@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 
 function DrugCard({ drug, onSelect }) {
   return (
@@ -36,7 +36,7 @@ function DrugDetail({ drug, onClose }) {
   const loadAdverseEvents = async () => {
     setLoadingEvents(true);
     try {
-      const { data } = await axios.get(`/api/drugs/${encodeURIComponent(drug.brandName)}/adverse-events?limit=5`);
+      const { data } = await api.get(`/api/drugs/${encodeURIComponent(drug.brandName)}/adverse-events?limit=5`);
       setAdverseEvents(data);
     } catch {
       setAdverseEvents({ events: [], total: 0 });
@@ -158,7 +158,7 @@ export default function DrugLookup() {
     setError('');
     setResults(null);
     try {
-      const { data } = await axios.get(`/api/drugs/search?q=${encodeURIComponent(query)}&limit=10`);
+      const { data } = await api.get(`/api/drugs/search?q=${encodeURIComponent(query)}&limit=10`);
       setResults(data);
     } catch (err) {
       setError(err.response?.data?.error || 'Search failed. Please try again.');
@@ -170,7 +170,7 @@ export default function DrugLookup() {
   const selectDrug = async (drug) => {
     setDetailLoading(true);
     try {
-      const { data } = await axios.get(`/api/drugs/${encodeURIComponent(drug.brandName)}/details`);
+      const { data } = await api.get(`/api/drugs/${encodeURIComponent(drug.brandName)}/details`);
       setSelected(data);
     } catch {
       setSelected(drug);

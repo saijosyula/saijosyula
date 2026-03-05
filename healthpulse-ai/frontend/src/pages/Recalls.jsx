@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 
 const CLASS_CONFIG = {
   'Class I': {
@@ -76,7 +76,7 @@ export default function Recalls() {
     const fetch = async () => {
       setLoading(true);
       try {
-        const { data } = await axios.get('/api/drugs/recalls/recent?limit=20');
+        const { data } = await api.get('/api/drugs/recalls/recent?limit=20');
         setRecalls(data.recalls || []);
       } catch (err) {
         setError('Failed to load recall data. Please try again.');
