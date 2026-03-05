@@ -48,33 +48,6 @@ No API keys required for any of this — OpenFDA and Disease.sh are both fully p
 
 ---
 
-## Running Locally
-
-No API keys needed. Just Node.js v18+.
-
-**With Docker:**
-```bash
-git clone https://github.com/saijosyula/healthpulse-ai.git
-cd healthpulse-ai
-docker-compose up --build
-```
-
-Open `http://localhost:5173`.
-
-**Without Docker (two terminals):**
-
-```bash
-# terminal 1
-cd backend && cp .env.example .env && npm install && npm run dev
-
-# terminal 2
-cd frontend && npm install && npm run dev
-```
-
-Open `http://localhost:5173`.
-
----
-
 ## Project Structure
 
 ```
