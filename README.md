@@ -102,6 +102,19 @@ Built a full-stack e-commerce platform with secure user authentication (SHA-256)
 
 ---
 
+### HealthPulse AI *(2025)*
+> React · Node.js · Express · OpenAI API · MongoDB
+
+AI-powered health assistant that analyzes symptoms, provides condition insights, and tracks health trends. Features a symptom checker, AI chat, and a stats dashboard — all in a clean, responsive interface.
+
+<p>
+  <a href="https://saijosyulafront.onrender.com" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Demo-HealthPulse%20AI-00C7B7?style=for-the-badge&logo=render&logoColor=white" />
+  </a>
+</p>
+
+---
+
 ## Education
 
 **University of Arizona** — B.S. Computer Science *(Aug 2022 – May 2026)*
