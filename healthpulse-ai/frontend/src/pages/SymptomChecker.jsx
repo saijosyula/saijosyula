@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 
 const SUGGESTED_SYMPTOMS = [
   'fever', 'headache', 'cough', 'fatigue', 'sore throat',
@@ -58,7 +58,7 @@ export default function SymptomChecker() {
     setError('');
     setResult(null);
     try {
-      const { data } = await axios.post('/api/symptoms/analyze', { symptoms });
+      const { data } = await api.post('/api/symptoms/analyze', { symptoms });
       setResult(data);
     } catch (err) {
       setError(err.response?.data?.error || 'Analysis failed. Please try again.');

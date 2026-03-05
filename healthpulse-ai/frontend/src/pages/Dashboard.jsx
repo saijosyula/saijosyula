@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../lib/api';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -61,9 +61,9 @@ export default function Dashboard() {
       setLoading(true);
       try {
         const [g, c, h] = await Promise.all([
-          axios.get('/api/stats/covid/global'),
-          axios.get('/api/stats/covid/countries?limit=10&sort=cases'),
-          axios.get(`/api/stats/covid/historical?days=${days}`),
+          api.get('/api/stats/covid/global'),
+          api.get('/api/stats/covid/countries?limit=10&sort=cases'),
+          api.get(`/api/stats/covid/historical?days=${days}`),
         ]);
         setGlobal(g.data);
         setCountries(c.data.countries || []);
@@ -80,7 +80,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchAdverse = async () => {
       try {
-        const { data } = await axios.get(`/api/stats/fda/drug-events?term=${encodeURIComponent(drugQuery)}&limit=10`);
+        const { data } = await api.get(`/api/stats/fda/drug-events?term=${encodeURIComponent(drugQuery)}&limit=10`);
         setAdverseStats(data);
       } catch {
         setAdverseStats(null);
