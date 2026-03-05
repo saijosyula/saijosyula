@@ -12,7 +12,7 @@ const healthRouter = require('./routes/health');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// cors needed so my react frontend on 5173 can talk to this server on 5000
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   methods: ['GET', 'POST'],
@@ -20,9 +20,10 @@ app.use(cors({
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Rate limiting — protects the free APIs we proxy
+// added rate limiting because openFDA only allows 240 req/min without an API key
+// 200 per 15min window is way under that limit so we should be fine
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   standardHeaders: true,
   legacyHeaders: false,
@@ -30,13 +31,12 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Routes
 app.use('/api/drugs', drugsRouter);
 app.use('/api/symptoms', symptomsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/health', healthRouter);
 
-// Root
+// just a root route so i can confirm the server is up
 app.get('/', (req, res) => {
   res.json({
     name: 'HealthPulse AI API',
@@ -51,12 +51,11 @@ app.get('/', (req, res) => {
   });
 });
 
-// 404 handler
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Error handler
+// global error handler - without this the whole server crashes on unhandled errors
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error', message: err.message });

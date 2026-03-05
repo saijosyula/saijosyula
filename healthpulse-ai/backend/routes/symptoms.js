@@ -3,8 +3,8 @@ const axios = require('axios');
 
 const router = express.Router();
 
-// Symptom-to-condition knowledge base
-// Built from publicly available medical resources (Mayo Clinic, WebMD, CDC)
+// built this knowledge base manually by cross-referencing Mayo Clinic, WebMD, and CDC
+// not a real ML model but good enough for a demo - might swap in a HuggingFace model later
 const SYMPTOM_CONDITIONS = {
   fever: [
     { condition: 'Influenza (Flu)', confidence: 0.85, urgency: 'moderate', description: 'Viral infection causing high fever, body aches, and fatigue.' },
@@ -74,7 +74,8 @@ const SYMPTOM_CONDITIONS = {
   ],
 };
 
-// Normalize symptom input for matching
+// people don't type medical terms exactly - "dizzy" instead of "dizziness", etc.
+// this normalizes their input so it matches our knowledge base keys
 function normalizeSymptom(sym) {
   return sym.toLowerCase().trim()
     .replace(/\s+/g, ' ')
@@ -88,17 +89,18 @@ function normalizeSymptom(sym) {
     .replace(/hard to breathe/g, 'shortness of breath');
 }
 
-// Find matching conditions from symptom list
+// using a Map so I can merge confidence scores when multiple symptoms
+// point to the same condition (e.g. fever + cough both suggest flu)
 function analyzeSymptoms(symptoms) {
   const conditionMap = new Map();
 
   symptoms.forEach((rawSym) => {
     const sym = normalizeSymptom(rawSym);
 
-    // Direct match
+    // try exact match first
     let matches = SYMPTOM_CONDITIONS[sym];
 
-    // Partial match if no direct match
+    // fall back to partial match if nothing found (e.g. "severe headache" -> "headache")
     if (!matches) {
       const key = Object.keys(SYMPTOM_CONDITIONS).find(
         (k) => sym.includes(k) || k.includes(sym)
@@ -109,7 +111,8 @@ function analyzeSymptoms(symptoms) {
     matches.forEach(({ condition, confidence, urgency, description }) => {
       if (conditionMap.has(condition)) {
         const existing = conditionMap.get(condition);
-        // Boost confidence when multiple symptoms point to same condition
+        // if we've seen this condition before, bump up the confidence a bit
+        // capping at 0.97 so it never shows 100% which would be misleading
         conditionMap.set(condition, {
           ...existing,
           confidence: Math.min(0.97, existing.confidence + confidence * 0.3),
@@ -132,8 +135,7 @@ function analyzeSymptoms(symptoms) {
     .slice(0, 6);
 }
 
-// POST /api/symptoms/analyze
-// Body: { symptoms: ["fever", "cough", "fatigue"] }
+// main endpoint - takes array of symptoms, returns ranked conditions
 router.post('/analyze', async (req, res) => {
   try {
     const { symptoms } = req.body;
@@ -169,8 +171,7 @@ router.post('/analyze', async (req, res) => {
   }
 });
 
-// GET /api/symptoms/list
-// Returns all known symptoms in the knowledge base
+// handy for the frontend to show autocomplete suggestions
 router.get('/list', (req, res) => {
   res.json({
     symptoms: Object.keys(SYMPTOM_CONDITIONS),

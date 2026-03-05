@@ -3,7 +3,8 @@ const axios = require('axios');
 const NodeCache = require('node-cache');
 
 const router = express.Router();
-const cache = new NodeCache({ stdTTL: 1800 }); // Cache 30 minutes
+// disease.sh updates every 10min or so, caching 30min is fine
+const cache = new NodeCache({ stdTTL: 1800 });
 
 const DISEASE_SH_BASE = 'https://disease.sh/v3/covid-19';
 
@@ -42,6 +43,7 @@ router.get('/covid/global', async (req, res) => {
 router.get('/covid/countries', async (req, res) => {
   try {
     const { limit = 10, sort = 'cases' } = req.query;
+    // whitelist the sort options so someone can't inject arbitrary field names
     const validSort = ['cases', 'deaths', 'recovered', 'active', 'critical'].includes(sort)
       ? sort
       : 'cases';
@@ -82,7 +84,8 @@ router.get('/covid/historical', async (req, res) => {
       `covid_historical_${validDays}`
     );
 
-    // Convert objects to sorted arrays for charting
+    // disease.sh returns historical data as an object like {"1/22/20": 555, "1/23/20": 654}
+    // chart.js needs an array so converting here
     const formatTimeline = (obj) =>
       Object.entries(obj || {})
         .map(([date, value]) => ({ date, value }))
@@ -119,8 +122,8 @@ router.get('/covid/vaccines', async (req, res) => {
   }
 });
 
-// GET /api/stats/fda/drug-events?term=aspirin
-// Drug adverse event counts from OpenFDA — great for showing most reported events
+// using openFDA's count feature to get top reactions for a drug
+// the .exact suffix counts full phrases instead of individual words (important!)
 router.get('/fda/drug-events', async (req, res) => {
   try {
     const { term = 'aspirin', limit = 10 } = req.query;

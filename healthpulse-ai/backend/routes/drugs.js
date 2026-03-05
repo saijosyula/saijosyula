@@ -3,11 +3,13 @@ const axios = require('axios');
 const NodeCache = require('node-cache');
 
 const router = express.Router();
-const cache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
+// cache results for 1 hour so we don't keep hitting the FDA API for the same queries
+const cache = new NodeCache({ stdTTL: 3600 });
 
 const OPENFDA_BASE = 'https://api.fda.gov/drug';
 
-// Helper to make OpenFDA requests with caching
+// pulled this out into its own function since every route needs the same
+// cache-check -> fetch -> cache-set pattern
 async function fetchOpenFDA(url, cacheKey) {
   const cached = cache.get(cacheKey);
   if (cached) return cached;
@@ -17,8 +19,8 @@ async function fetchOpenFDA(url, cacheKey) {
   return response.data;
 }
 
-// GET /api/drugs/search?q=aspirin&limit=10
-// Search drugs by name using OpenFDA drug label endpoint
+// search by brand name OR generic name - FDA query syntax uses + as OR here
+// took me a while to figure out their query syntax lol
 router.get('/search', async (req, res) => {
   try {
     const { q, limit = 10 } = req.query;
@@ -55,8 +57,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// GET /api/drugs/:name/details
-// Get full label details for a drug
+// full drug label - returns everything the FDA has on file for this drug
 router.get('/:name/details', async (req, res) => {
   try {
     const name = encodeURIComponent(req.params.name);
@@ -94,8 +95,8 @@ router.get('/:name/details', async (req, res) => {
   }
 });
 
-// GET /api/drugs/:name/adverse-events?limit=5
-// Get adverse event reports from FDA FAERS database
+// FAERS = FDA Adverse Event Reporting System
+// this was the coolest part of the openFDA API to me - real patient reports
 router.get('/:name/adverse-events', async (req, res) => {
   try {
     const { name } = req.params;
@@ -127,8 +128,7 @@ router.get('/:name/adverse-events', async (req, res) => {
   }
 });
 
-// GET /api/drugs/recalls?limit=10
-// Get recent drug recalls from FDA
+// FDA enforcement = drug recalls. sorting by newest first
 router.get('/recalls/recent', async (req, res) => {
   try {
     const { limit = 10 } = req.query;
