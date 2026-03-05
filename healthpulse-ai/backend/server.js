@@ -14,7 +14,9 @@ const PORT = process.env.PORT || 5000;
 
 // cors needed so my react frontend on 5173 can talk to this server on 5000
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL.split(',').map(u => u.trim())
+    : ['http://localhost:5173', 'https://saijosyulafront.onrender.com'],
   methods: ['GET', 'POST'],
 }));
 app.use(morgan('dev'));
