@@ -2,7 +2,7 @@
 
 Search symptoms, look up FDA drug info, check drug recalls, and see global disease stats — all pulling from real government APIs.
 
-**[→ Live Demo](https://healthpulse-ai.vercel.app)**
+**[→ Live Demo](https://saijosyulafront.onrender.com/)**
 
 Built this as a portfolio project to get comfortable with full-stack development and working with external APIs. Ended up being a lot more interesting than I expected once I started digging into what the FDA actually makes publicly available.
 
